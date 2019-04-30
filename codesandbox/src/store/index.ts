@@ -6,6 +6,7 @@ import { composeEnhancers } from './utils';
 import rootReducer from './root-reducer';
 import rootEpic from './root-epic';
 import services from '../services';
+import logger from 'redux-logger';
 
 export const epicMiddleware = createEpicMiddleware<
   RootAction,
@@ -17,7 +18,7 @@ export const epicMiddleware = createEpicMiddleware<
 });
 
 // configure middlewares
-const middlewares = [epicMiddleware];
+const middlewares = [epicMiddleware, logger];
 // compose enhancers
 const enhancer = composeEnhancers(applyMiddleware(...middlewares));
 
