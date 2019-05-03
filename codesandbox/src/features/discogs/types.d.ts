@@ -1,6 +1,6 @@
 declare module 'MyModels' {
   export type Artist = {
-    id: string;
+    id: number;
     title: string;
   };
 }

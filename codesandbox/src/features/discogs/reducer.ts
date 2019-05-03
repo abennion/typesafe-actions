@@ -13,16 +13,7 @@ interface ArtistsStateType {
 const initialState: ArtistsStateType = {
   loading: false,
   query: '',
-  artists: [
-    {
-      id: '1',
-      title: 'rolling strongs',
-    },
-    {
-      id: '2',
-      title: 'thee nobodies',
-    },
-  ],
+  artists: [],
   error: '',
 };
 
@@ -53,9 +44,9 @@ export const artists = createReducer(initialState)
       }));
 
 const artistsReducer = combineReducers({
-  // isLoadingArtists,
   artists,
 });
 
 export default artistsReducer;
+
 export type ArtistsState = ReturnType<typeof artistsReducer>;

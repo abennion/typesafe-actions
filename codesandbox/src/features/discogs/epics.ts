@@ -1,6 +1,4 @@
 import { Epic } from 'redux-observable';
-// import { Artist } from 'MyModels';
-// import { timer } from 'rxjs';
 import {
   filter,
   map,
@@ -8,8 +6,14 @@ import {
   catchError,
   takeUntil,
   debounceTime,
+  tap,
 } from 'rxjs/operators';
-import { RootAction, RootState, Services, isActionOf } from 'typesafe-actions';
+import {
+  RootAction,
+  RootState,
+  Services,
+  isActionOf,
+} from 'typesafe-actions';
 import {
   of,
 } from 'rxjs';
@@ -36,13 +40,16 @@ export const searchArtistsEpic: Epic<
       debounceTime(3000),
       // if not empty or null
       filter(action => !!action.payload),
+      tap(action => console.info('passed debounce', action)),
       switchMap(action => ajax(getArgs(action.payload)).pipe(
+        tap((res: AjaxResponse) =>
+          console.info('response', res.response.results)),
         map((res: AjaxResponse) =>
           // if success, map the response to our artist type
           searchArtistsAsync.success(
             res.response.results.map((el: any) =>
               ({
-                id: el.id,
+                id: parseInt(el.id, 10),
                 title: el.title,
               })
             )
