@@ -4,13 +4,16 @@ import { Epic } from 'redux-observable';
 import {
   filter,
   map,
-  // switchMap,
-  mergeMap,
-  // takeUntil,
-  tap
+  switchMap,
+  catchError,
+  takeUntil,
+  debounceTime,
 } from 'rxjs/operators';
 import { RootAction, RootState, Services, isActionOf } from 'typesafe-actions';
-import { ajax } from 'rxjs/ajax';
+import {
+  of,
+} from 'rxjs';
+import { ajax, AjaxResponse } from 'rxjs/ajax';
 import { searchArtistsAsync } from './actions';
 
 const getArgs = (query: string) => ({
@@ -36,24 +39,23 @@ export const searchArtistsEpic: Epic<
   Services
 > = (action$) =>
     action$.pipe(
-      tap(console.log),
+      // tap(console.log),
       filter(isActionOf(searchArtistsAsync.request)),
-      // map(action => action.payload),
+      debounceTime(3000),
       filter(action => !!action.payload),
-      tap(action => console.log('action', action)),
-      mergeMap(action => ajax(getArgs(action.payload)).pipe(
-        // map((res: any) => searchArtistsAsync.success(res.results as Artists[])),
-        tap(res => console.log('res', res)),
-        map((res: any) =>
-          res.response.results.map((el: any) => ({ id: el.id, title: el.title }))
+      // tap(action => console.log('action', action)),
+      switchMap(action => ajax(getArgs(action.payload)).pipe(
+        map((res: AjaxResponse) =>
+          searchArtistsAsync.success(
+            res.response.results.map((el: any) => ({ id: el.id, title: el.title }))
+          )
         ),
-        map(artists => searchArtistsAsync.success(artists))
-        // map((res: any) =>
-        //   searchArtistsAsync.success(
-        //     res.results.map((el: any) => ({ id: el.id, title: el.title })))
-        //   )
-        // )
-        // catchError((err: Error) => searchArtistsAsync.failure(err))
-      )
-      )
+        catchError((err: Error) => of(searchArtistsAsync.failure(err.message))),
+        takeUntil(action$.pipe(filter(
+          isActionOf([
+            searchArtistsAsync.success,
+            searchArtistsAsync.failure,
+          ])
+        )))
+      ))
     );
