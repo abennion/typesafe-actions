@@ -24,14 +24,6 @@ const getArgs = (query: string) => ({
   },
 });
 
-// curl "https://api.discogs.com/database/search?q=Madlib"
-// -H "Authorization: Discogs token=RZZkINnywTUvdjQlBnWxxyVScrcrrbTIDYrUQWZT"
-// {"pagination": {"per_page": 50, "items": 2029, "page": 1,
-// "urls": {"last": "https://api.discogs.com/database/search?q=Madlib&per_page=50&page=41",
-// "next": "https://api.discogs.com/database/search?q=Madlib&per_page=50&page=2"},
-// "pages": 41},
-// "results": [{"thumb": "https://img.discogs.com/ixlt5
-
 export const searchArtistsEpic: Epic<
   RootAction,
   RootAction,
@@ -39,18 +31,25 @@ export const searchArtistsEpic: Epic<
   Services
 > = (action$) =>
     action$.pipe(
-      // tap(console.log),
+      // if we get a request
       filter(isActionOf(searchArtistsAsync.request)),
       debounceTime(3000),
+      // if not empty or null
       filter(action => !!action.payload),
-      // tap(action => console.log('action', action)),
       switchMap(action => ajax(getArgs(action.payload)).pipe(
         map((res: AjaxResponse) =>
+          // if success, map the response to our artist type
           searchArtistsAsync.success(
-            res.response.results.map((el: any) => ({ id: el.id, title: el.title }))
+            res.response.results.map((el: any) =>
+              ({
+                id: el.id,
+                title: el.title,
+              })
+            )
           )
         ),
-        catchError((err: Error) => of(searchArtistsAsync.failure(err.message))),
+        // if an error, then emit a failure action
+        catchError((err: Error) => of(searchArtistsAsync.failure(err))),
         takeUntil(action$.pipe(filter(
           isActionOf([
             searchArtistsAsync.success,

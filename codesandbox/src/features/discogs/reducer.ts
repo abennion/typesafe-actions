@@ -1,14 +1,13 @@
 import { Artist } from 'MyModels';
 import { combineReducers } from 'redux';
 import { createReducer } from 'typesafe-actions';
+import { searchArtistsAsync, updateQueryAsync } from './actions';
 
-import { searchArtistsAsync } from './actions';
-// import { string } from 'prop-types';
-
-interface  ArtistsStateType {
+interface ArtistsStateType {
   loading: boolean;
   query: string;
   artists: Artist[];
+  error: string;
 }
 
 const initialState: ArtistsStateType = {
@@ -24,21 +23,34 @@ const initialState: ArtistsStateType = {
       title: 'thee nobodies',
     },
   ],
+  error: '',
 };
 
 export const artists = createReducer(initialState)
   .handleAction(
+    updateQueryAsync.request,
+    (state, action) =>
+      Object.assign({}, state, { query: action.payload }))
+  .handleAction(
     searchArtistsAsync.request,
     (state, action) =>
-      Object.assign({}, state, {loading: true, query: action.payload}))
+      Object.assign({}, state, { loading: true }))
   .handleAction(
     searchArtistsAsync.success,
     (state, action) =>
-      Object.assign({}, state, {loading: false, artists: action.payload}))
+      Object.assign({}, state, {
+        loading: false,
+        artists: action.payload,
+        error: '',
+      }))
   .handleAction(
     searchArtistsAsync.failure,
     (state, action) =>
-      Object.assign({}, state, {loading: false, artists: []}));
+      Object.assign({}, state, {
+        loading: false,
+        artists: [],
+        error: action.payload.message,
+      }));
 
 const artistsReducer = combineReducers({
   // isLoadingArtists,
