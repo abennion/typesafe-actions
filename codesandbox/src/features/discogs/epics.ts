@@ -21,7 +21,7 @@ import { ajax, AjaxResponse } from 'rxjs/ajax';
 import { searchArtistsAsync } from './actions';
 
 const getArgs = (query: string) => ({
-  url: `https://api.discogs.com/database/search?q=${query}`,
+  url: `https://api.discogs.com/database/search?q=${query}&type=artist`,
   method: 'GET',
   headers: {
     Authorization: 'Discogs token=RZZkINnywTUvdjQlBnWxxyVScrcrrbTIDYrUQWZT',

@@ -1,10 +1,7 @@
 import { RootState } from 'typesafe-actions';
 import * as React from 'react';
 import { connect } from 'react-redux';
-
 import * as selectors from '../selectors';
-// import * as actions from '../actions';
-
 import ArtistListItem from './ArtistListItem';
 
 const mapStateToProps = (state: RootState) => ({
@@ -24,6 +21,7 @@ function ArtistList({ isLoading, artists = [] }: Props) {
       {artists.map(artist => (
         <li key={artist.id}>
           <ArtistListItem
+            id={artist.id}
             title={artist.title}
           />
         </li>
